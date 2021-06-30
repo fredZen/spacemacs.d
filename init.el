@@ -752,6 +752,54 @@ This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump.")
 
+(require 'ansi-color)
+
+(defun display-ansi-colors ()
+  (interactive)
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
+
+(defun copy-file-name-to-clipboard ()
+  "Copy the current buffer file name to the clipboard."
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (when filename
+      (kill-new filename)
+      (message "Copied buffer file name '%s' to the clipboard." filename))))
+
+(defun insert-timestamp ()
+  "Insert current local date and time as a big list of numbers."
+  (interactive)
+  (insert (format-time-string "%Y-%m-%d %H:%M:%S %z")))
+
+(defun new-zettel ()
+  (interactive)
+  (goto-char 1)
+  (insert "---\ntitle: ")
+  (let ((title-pt (point)))
+    (insert "\nicon: \ndate: ")
+    (insert-timestamp)
+    (insert "\nimage: \nimage-alt: \nid: "
+            (file-name-sans-extension (file-name-nondirectory (buffer-file-name)))
+            "\ntags: []\n---\n")
+    (goto-char title-pt)))
+
+(defun journal-entry ()
+  (interactive)
+  (find-file (format-time-string "~/dev/zettelkasten/journal/%Y/%m/_posts/%Y-%m-%d-%A.md")))
+
+(defun slack-francais-vers-unicode ()
+  (interactive)
+  (goto-char 1)
+  (while (search-forward ":visage_à_l'envers:" nil t) (replace-match "🙃" nil t))
+  (goto-char 1)
+  (while (search-forward ":yeux_en_cœur:" nil t) (replace-match "😍" nil t))
+  (goto-char 1)
+  (while (search-forward ":visage_légèrement_souriant:" nil t) (replace-match "🙂" nil t))
+  (goto-char 1)
+  (while (search-forward ":cœur_palpitant:" nil t) (replace-match "💗" nil t)))
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -761,6 +809,8 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
 
+  (global-emojify-mode)
+  (global-set-key (kbd "C-'") 'insert-timestamp)
 
   ;; LSP  hacking
   (setq lsp-ui-sideline-enable nil)
